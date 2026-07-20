@@ -14,14 +14,13 @@ To install and use dependencies, Python normally requires a virtual environment 
 The following instructions are for Linux. The link at the beginning gives information for different platforms.
 
 # uv setup instructions (copy/paste below lines in terminal. Make sure terminal is in repo dir):
-uv venv # creates virtual environment
-.venv/bin/activate # places terminal session in venv
-uv sync # installs project dependances in venv as outlined in pyproject.toml
-#end of uv setup
+uv venv # creates virtual environment\
+.venv/bin/activate # places terminal session in venv\
+uv sync # installs project dependances in venv as outlined in pyproject.toml\
+#end of uv setup\
 
 # pip setup instructions (copy/paste below lines in terminal. Make sure terminal is in repo dir):
-python3 -m venv .venv # creates venv in .venv dir. '.venv' can be named anything
-source .venv/bin/activate # places terminal session in venv
-pip install -r requirements.txt # installs project dependancies in venv as outlined in requirements.txt
-#end of pip setup
-
+python3 -m venv .venv # creates venv in .venv dir. '.venv' can be named anything\
+source .venv/bin/activate # places terminal session in venv\
+pip install -r requirements.txt # installs project dependancies in venv as outlined in requirements.txt\
+#end of pip setup\
