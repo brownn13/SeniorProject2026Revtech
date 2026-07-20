@@ -1,0 +1,12 @@
+[project]
+name = "revtech"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.14"
+dependencies = [
+    "pandas>=3.0.3",
+    "plotly>=6.9.0",
+    "pytest>=9.1.1",
+    "streamlit>=1.59.2",
+]
