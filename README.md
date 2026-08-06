@@ -46,7 +46,7 @@ DO NOT USE PIP IF UV IS SETUP! CHOOSE ONLY ONE! Copy and paste the lines below i
 
 ```powershell
 uv venv #creates virtual environment
-.venv\bin\activate #places terminal session in venv
+.venv\Scripts\activate #places terminal session in venv
 uv sync #installs dependencies in venv
 #end of uv setup
 ```
@@ -57,7 +57,7 @@ DO NOT USE UV IF PIP IS SETUP! CHOOSE ONLY ONE! Copy and paste the lines below i
 
 ```powershell
 python3 -m venv .venv #creates venv in .venv directory; ".venv" can be named anything
-.venv\bin\activate #places terminal session in venv
+.venv\Scripts\activate #places terminal session in venv
 pip install -r requirements.txt #installs dependencies in venv
 #end of pip setup
 ```
