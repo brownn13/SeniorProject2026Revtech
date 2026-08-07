@@ -16,8 +16,11 @@ To install and use dependencies, Python normally requires a virtual environment,
 VSCode Users: Install the UV Extension at <https://marketplace.visualstudio.com/items?itemName=the0807.uv-toolkit>
 This is the easiest route to get started. Afterwards, continue to uv setup instructions.
 
+## uv automatic setup (all OSs)
+After cloning repo and setting up uv, just run ```uv run revtech``` and the environment will be set up for you.
+
 ## MacOS/Linux
-## uv setup instructions
+## uv manual setup instructions
 
 DO NOT USE PIP IF UV IS SETUP! CHOOSE ONLY ONE! Copy and paste the lines below into a terminal. Make sure the terminal is in the repository directory.
 
@@ -40,7 +43,7 @@ pip install -r requirements.txt #installs dependencies in venv
 ```
 
 ## Windows
-## uv setup instructions
+## uv manual setup instructions
 
 DO NOT USE PIP IF UV IS SETUP! CHOOSE ONLY ONE! Copy and paste the lines below into a terminal. Make sure the terminal is in the repository directory.
 
