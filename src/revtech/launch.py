@@ -35,5 +35,4 @@ about_us_path = './about_us.md'
 with open(about_us_path, 'r') as f:
     about_us_data = f.read()
 
-about_us = io.StringIO(about_us_data)
-st.write(about_us)
+st.markdown(about_us_data)
