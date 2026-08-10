@@ -1,7 +1,9 @@
 # launch.py
-import streamlit as st
-import pandas as pd
+import io
+
 import numpy as np
+import pandas as pd
+import streamlit as st
 
 st.set_page_config (
     page_title = "RevTech",
@@ -28,4 +30,10 @@ st.line_chart(data)
 
 
 st.header("About Us:", divider = "red")
-st.write("TODO: write a blurb about RevTech")
+
+about_us_path = './about_us.md'
+with open(about_us_path, 'r') as f:
+    about_us_data = f.read()
+
+about_us = io.StringIO(about_us_data)
+st.write(about_us)
