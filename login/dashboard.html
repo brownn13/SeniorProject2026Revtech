@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f4f6f9;
+        }
+
+        /* Top Navigation */
+        .navbar {
+            background: #007bff;
+            padding: 15px 25px;
+            color: #fff;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .navbar h1 {
+            margin: 0;
+            font-size: 22px;
+        }
+
+        .logout-btn {
+            background: #fff;
+            color: #007bff;
+            padding: 8px 14px;
+            border-radius: 5px;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .logout-btn:hover {
+            background: #e6e6e6;
+        }
+
+        /* Dashboard Content */
+        .container {
+            padding: 30px;
+        }
+
+        .welcome {
+            font-size: 24px;
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        .cards {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .card {
+            background: #fff;
+            padding: 25px;
+            width: 300px;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .card h3 {
+            margin-top: 0;
+            color: #007bff;
+        }
+
+        .card p {
+            color: #555;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="navbar">
+        <h1>Dashboard</h1>
+        <button class="logout-btn" onclick="logout()">Logout</button>
+    </div>
+
+    <div class="container">
+        <div class="welcome">Welcome to your dashboard!</div>
+
+        <div class="cards">
+            <div class="card">
+                <h3>Profile Overview</h3>
+                <p>Quick summary of your account details and preferences.</p>
+            </div>
+
+            <div class="card">
+                <h3>Recent Activity</h3>
+                <p>Track your latest interactions and updates.</p>
+            </div>
+
+            <div class="card">
+                <h3>System Status</h3>
+                <p>Monitor system health, uptime, and notifications.</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function logout() {
+            // Clear session or token if needed
+            window.location.href = "/login/index.html";
+        }
+    </script>
+
+</body>
+</html>
+
