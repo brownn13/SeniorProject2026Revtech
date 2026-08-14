@@ -8,7 +8,7 @@ def login():
         if request.form['username'] == 'admin' and request.form['password'] == 'password1234':
             return render_template('dashboard.html')
         else:  
-            return render_template("login.html", error="Invalid email or password")
+            return render_template("login.html", error="Invalid user or password")
     else:
         return render_template('login.html')
     
