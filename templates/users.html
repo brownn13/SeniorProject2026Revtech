@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+{% block content %}
+    <h2>Registered Users Catalog (Admin View)</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>System ID</th>
+                <th>Registered Username</th>
+                <th>Assigned System Role</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for user in users %}
+                <tr>
+                    <td>{{ user['id'] }}</td>
+                    <td>{{ user['username'] }}</td>
+                    <td><strong>{{ user['role'] }}</strong></td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}

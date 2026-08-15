@@ -1,7 +1,0 @@
-Useful references and resources:
-
-Read csv with Pandas and Streamlit:
-https://docs.streamlit.io/develop/api-reference/text/st.help
-
-Log in/log out button:
-https://docs.streamlit.io/develop/concepts/multipage-apps/page-and-navigation
