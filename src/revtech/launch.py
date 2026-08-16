@@ -14,7 +14,6 @@ data = pd.DataFrame(
     np.random.randn(20, 3),
     columns=['Fuel Pressure', 'Air/Fuel Ratio', 'Oil Pressure'])
 
-
 st.title("Welcome to RevTech!")
 st.sidebar.success("Welcome!")
 
@@ -38,6 +37,15 @@ graph_button = st.sidebar.page_link (
 
 st.caption("Example chart")
 st.line_chart(data)
+
+uploaded_files = st.file_uploader(
+    "Upload data", accept_multiple_files=False, type="csv"
+)
+
+if (uploaded_files):
+    for uploaded_file in uploaded_files:
+        df = pd.read_csv(uploaded_file)
+        st.write(df)
 
 st.header("About Us:", divider = "red")
 
