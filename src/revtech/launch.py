@@ -16,18 +16,28 @@ data = pd.DataFrame(
 
 
 st.title("Welcome to RevTech!")
-
 st.sidebar.success("Welcome!")
+
+launch_button = st.sidebar.page_link (
+    "launch.py",
+    label = "Home",
+    disabled = True
+    )
+
 login_button = st.sidebar.page_link (
     "pages/1_login.py",
     label = "Login",
     disabled = True
     )
 
+graph_button = st.sidebar.page_link (
+    "pages/2_graph.py",
+    label = "Graph",
+    disabled = True
+    )
 
 st.caption("Example chart")
 st.line_chart(data)
-
 
 st.header("About Us:", divider = "red")
 
