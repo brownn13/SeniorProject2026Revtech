@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+{% block title %}My Profile{% endblock %}
+
+{% block content %}
+    <h1>My Profile</h1>
+    <p>Logged in as: <strong>{{ current_user.username }}</strong></p>
+    <p>Account Type: <span class="user-role">{{ current_user.role }}</span></p>
+    
+    <hr style="border: 0; border-top: 1px solid var(--border-color); margin: 20px 0;">
+    
+    <h2>Change Password</h2>
+    <form method="post">
+        <div class="form-group">
+            <label for="current_password">Current Password</label>
+            <input type="password" id="current_password" name="current_password" required>
+        </div>
+        <div class="form-group">
+            <label for="new_password">New Password</label>
+            <input type="password" id="new_password" name="new_password" required>
+        </div>
+        <div class="form-group">
+            <label for="confirm_password">Confirm New Password</label>
+            <input type="password" id="confirm_password" name="confirm_password" required>
+        </div>
+        <button type="submit">Update Password</button>
+    </form>
+{% endblock %}
