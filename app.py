@@ -177,6 +177,32 @@ def delete_user(user_id):
     flash('User deleted.', 'success')
     return redirect(url_for('user_list'))
 
+@app.route('/admin/register', methods=['POST'])
+@login_required
+@admin_required
+def register_user():
+    username = request.form.get('username')
+    password = request.form.get('password')
+    role = request.form.get('role')
+
+    if not username or not password or not role:
+        flash('All fields are required.', 'error')
+        return redirect(url_for('user_list'))
+
+    hashed_password = generate_password_hash(password)
+
+    with get_db() as conn:
+        try:
+            conn.execute('INSERT INTO users (username, password, role) VALUES (?, ?, ?)', 
+                         (username, hashed_password, role))
+            conn.commit()
+            flash(f'User "{username}" registered successfully!', 'success')
+        except sqlite3.IntegrityError:
+            flash('Username already exists.', 'error')
+
+    return redirect(url_for('user_list'))
+
+
 if __name__ == '__main__':
     init_db()
     app.run(debug=True)
