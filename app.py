@@ -42,6 +42,8 @@ def admin_required(f):
         return f(*args, **kwargs)
     return decorated_function
 
+VALID_ROLES = {'user', 'admin'}
+
 
 # --- DATABASE SETUP ---
 def get_db():
@@ -177,6 +179,32 @@ def delete_user(user_id):
     flash('User deleted.', 'success')
     return redirect(url_for('user_list'))
 
+@app.route('/users/role/<int:user_id>', methods=['POST'])
+@login_required
+@admin_required
+def update_user_role(user_id):
+    role = request.form.get('role')
+
+    if role not in VALID_ROLES:
+        flash('Invalid role selected.', 'error')
+        return redirect(url_for('user_list'))
+
+    if current_user.id == user_id and role != 'admin':
+        flash('You cannot remove administrator access from your own account.', 'error')
+        return redirect(url_for('user_list'))
+
+    with get_db() as conn:
+        user = conn.execute('SELECT id FROM users WHERE id = ?', (user_id,)).fetchone()
+        if not user:
+            flash('User not found.', 'error')
+            return redirect(url_for('user_list'))
+
+        conn.execute('UPDATE users SET role = ? WHERE id = ?', (role, user_id))
+        conn.commit()
+
+    flash('User role updated.', 'success')
+    return redirect(url_for('user_list'))
+
 @app.route('/admin/register', methods=['POST'])
 @login_required
 @admin_required
@@ -185,7 +213,7 @@ def register_user():
     password = request.form.get('password')
     role = request.form.get('role')
 
-    if not username or not password or not role:
+    if not username or not password or role not in VALID_ROLES:
         flash('All fields are required.', 'error')
         return redirect(url_for('user_list'))
 

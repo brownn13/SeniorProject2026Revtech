@@ -84,6 +84,13 @@
                 <td class="username-cell"><strong>{{ u['username'] }}</strong></td>
                 <td class="role-cell"><span class="user-role">{{ u['role'] }}</span></td>
                 <td>
+                    <form action="{{ url_for('update_user_role', user_id=u['id']) }}" method="post" style="display: inline-flex; flex-direction: row; align-items: center; gap: 6px; margin: 0 10px 0 0;">
+                        <label for="role-{{ u['id'] }}" style="font-size: 14px;">Assign role</label>
+                        <select id="role-{{ u['id'] }}" name="role" onchange="this.form.submit()" style="padding: 5px 8px; border: 1px solid #ccc; border-radius: 4px;">
+                            <option value="user" {% if u['role'] == 'user' %}selected{% endif %}>User</option>
+                            <option value="admin" {% if u['role'] == 'admin' %}selected{% endif %}>Admin</option>
+                        </select>
+                    </form>
                     {% if u['id'] != current_user.id %}
                         <form action="{{ url_for('delete_user', user_id=u['id']) }}" method="post" style="margin: 0;">
                             <button 
