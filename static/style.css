@@ -1,16 +1,30 @@
+/* -------------------------------------------------
+   Design Tokens
+--------------------------------------------------- */
 :root {
-    --bg-color: #f4f7f6;
-    --card-bg: #ffffff;
-    --text-main: #333333;
-    --text-muted: #666666;
+    --bg-color: #0f1115;
+    --card-bg: #1a1d23;
+
+    --text-main: #e6e6e6;
+    --text-muted: #9aa0a6;
+
     --primary: #4a90e2;
-    --primary-hover: #357abd;
+    --primary-hover: #6aa8ff;
+
     --danger: #e74c3c;
-    --danger-hover: #c0392b;
+    --danger-hover: #ff6b5c;
+
     --success: #2ecc71;
-    --border-color: #dddddd;
+
+    --border-color: #2a2e35;
+
+    --input-bg: #111318;
+    --input-bg-focus: #1a1d23;
 }
 
+/* -------------------------------------------------
+   Global Layout
+--------------------------------------------------- */
 body {
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     background-color: var(--bg-color);
@@ -23,16 +37,25 @@ body {
     align-items: center;
 }
 
+/* Shared card style */
+.card {
+    background: var(--card-bg);
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+}
+
+/* Main container */
 .container {
     width: 100%;
     max-width: 600px;
-    background: var(--card-bg);
     padding: 30px;
-    border-radius: 8px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     box-sizing: border-box;
 }
 
+/* -------------------------------------------------
+   Navigation
+--------------------------------------------------- */
 nav {
     margin-bottom: 20px;
     padding-bottom: 15px;
@@ -52,62 +75,96 @@ nav a:hover {
     text-decoration: underline;
 }
 
-h1 {
+/* -------------------------------------------------
+   Typography
+--------------------------------------------------- */
+h1, .login-card h2 {
     margin-top: 0;
     font-size: 24px;
-    color: #111;
+    color: #ffffff;
+    text-align: center;
 }
 
-form {
+.login-subtitle {
+    margin-bottom: 24px;
+    font-size: 14px;
+    color: var(--text-muted);
+    text-align: center;
+}
+
+/* -------------------------------------------------
+   Forms
+--------------------------------------------------- */
+form, .login-form {
     display: flex;
     flex-direction: column;
-    gap: 15px;
+    gap: 20px;
 }
 
 .form-group {
     display: flex;
     flex-direction: column;
-    gap: 5px;
+    gap: 6px;
 }
 
-input[type="text"], input[type="password"] {
-    padding: 10px;
-    border: 1px solid var(--border-color);
-    border-radius: 4px;
-    font-size: 16px;
+.form-group label {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-main);
+}
+
+input[type="text"],
+input[type="password"],
+.form-group input {
     width: 100%;
-    box-sizing: border-box;
+    padding: 12px 14px;
+    font-size: 15px;
+    border: 1px solid var(--border-color);
+    border-radius: 5px;
+    background-color: var(--input-bg);
+    color: var(--text-main);
+    transition: border-color 0.2s ease, background-color 0.2s ease;
 }
 
-input:focus {
+input:focus,
+.form-group input:focus {
     border-color: var(--primary);
+    background-color: var(--input-bg-focus);
     outline: none;
-    box-shadow: 0 0 4px rgba(74, 144, 226, 0.2);
+    box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.25);
 }
 
-button {
-    padding: 10px 15px;
+/* -------------------------------------------------
+   Buttons
+--------------------------------------------------- */
+button,
+.btn-submit,
+.btn-danger {
     border: none;
-    border-radius: 4px;
-    font-size: 16px;
+    border-radius: 5px;
     cursor: pointer;
     font-weight: bold;
-    transition: background 0.2s ease;
+    transition: background-color 0.2s ease;
 }
 
-button[type="submit"] {
+button[type="submit"],
+.btn-submit {
+    width: 100%;
+    padding: 14px;
+    font-size: 16px;
     background-color: var(--primary);
-    color: white;
+    color: #ffffff;
 }
 
-button[type="submit"]:hover {
+button[type="submit"]:hover,
+.btn-submit:hover {
     background-color: var(--primary-hover);
 }
 
 .btn-danger {
     background-color: var(--danger);
     color: white;
-    padding: 5px 10px;
+    padding: 8px 12px;
     font-size: 14px;
 }
 
@@ -115,29 +172,44 @@ button[type="submit"]:hover {
     background-color: var(--danger-hover);
 }
 
-.flash-message {
-    padding: 12px;
-    border-radius: 4px;
+/* -------------------------------------------------
+   Flash Messages
+--------------------------------------------------- */
+.flash-messages {
     margin-bottom: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.flash-message {
+    padding: 12px 16px;
+    border-radius: 4px;
+    font-size: 14px;
     font-weight: 500;
 }
 
+.flash-message.error,
 .flash-error {
-    background-color: #fde8e8;
+    background-color: #3a1f1f;
     color: var(--danger);
-    border: 1px solid #f8b4b4;
+    border: 1px solid #5a2a2a;
 }
 
+.flash-message.success,
 .flash-success {
-    background-color: #def7ec;
+    background-color: #1f3a2e;
     color: var(--success);
-    border: 1px solid #84e1bc;
+    border: 1px solid #2e5a45;
 }
 
+/* -------------------------------------------------
+   Lists & Tables
+--------------------------------------------------- */
 ul {
     list-style: none;
     padding: 0;
-    margin: 20px 0 0 0;
+    margin-top: 20px;
 }
 
 li {
@@ -155,148 +227,43 @@ li:last-child {
 .user-role {
     font-size: 14px;
     color: var(--text-muted);
-    background: #eee;
+    background: #2a2e35;
     padding: 2px 6px;
     border-radius: 4px;
     margin-left: 8px;
 }
+
 .user-table {
     width: 100%;
     border-collapse: collapse;
     margin-top: 20px;
 }
-.user-table th, .user-table td {
+
+.user-table th,
+.user-table td {
     padding: 12px;
     text-align: left;
-    border-bottom: 1px solid #ddd;
+    border-bottom: 1px solid var(--border-color);
 }
+
 .user-table th {
-    background-color: #f8f9fa;
+    background-color: #1f2229;
     font-weight: bold;
 }
-/* Container to completely center the login panel on the screen */
+
+/* -------------------------------------------------
+   Login Page
+--------------------------------------------------- */
 .login-container {
     display: flex;
     justify-content: center;
     align-items: center;
-    min-height: 75vh; /* Gives breathing space above and below the header/footer */
+    min-height: 75vh;
     padding: 20px;
-    box-sizing: border-box;
 }
 
-/* The structural glass/card style body */
 .login-card {
-    background: #ffffff;
     width: 100%;
     max-width: 420px;
     padding: 40px;
-    border-radius: 8px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    border: 1px solid #eaeaea;
-}
-
-.login-card h2 {
-    margin: 0 0 8px 0;
-    font-size: 24px;
-    color: #2c3e50;
-    text-align: center;
-}
-
-.login-subtitle {
-    margin: 0 0 24px 0;
-    font-size: 14px;
-    color: #7f8c8d;
-    text-align: center;
-    line-height: 1.4;
-}
-
-/* Stack layout for forms */
-.login-form {
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-}
-
-.form-group {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-}
-
-.form-group label {
-    font-size: 14px;
-    font-weight: 600;
-    color: #34495e;
-}
-
-/* Input boxes styling */
-.form-group input {
-    width: 100%;
-    padding: 12px 14px;
-    font-size: 15px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    background-color: #fafafa;
-    box-sizing: border-box;
-    transition: border-color 0.2s ease, background-color 0.2s ease;
-}
-
-.form-group input:focus {
-    border-color: #007bff;
-    background-color: #ffffff;
-    outline: none;
-    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.15);
-}
-
-/* Call-to-action Login Button */
-.btn-submit {
-    width: 100%;
-    padding: 14px;
-    font-size: 16px;
-    font-weight: bold;
-    color: #ffffff;
-    background-color: #007bff;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: background-color 0.2s ease;
-    margin-top: 10px;
-}
-
-.btn-submit:hover {
-    background-color: #0056b3;
-}
-
-.btn-submit:active {
-    background-color: #004085;
-}
-
-/* --- Alert and Error Messaging Styling --- */
-.flash-messages {
-    margin-bottom: 20px;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
-
-.flash-message {
-    padding: 12px 16px;
-    border-radius: 4px;
-    font-size: 14px;
-    font-weight: 500;
-    line-height: 1.4;
-}
-
-/* Handles styling for bad passwords / error responses from Flask */
-.flash-message.error {
-    background-color: #fdf2f2;
-    color: #9b1c1c;
-    border: 1px solid #f8b4b4;
-}
-
-/* Handles success feedback alerts if needed */
-.flash-message.success {
-    background-color: #f3faf7;
-    color: #03543f;
-    border: 1px solid #def7ec;
 }
