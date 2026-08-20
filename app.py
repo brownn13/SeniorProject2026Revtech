@@ -59,7 +59,20 @@ def init_db():
                 role TEXT NOT NULL
             )
         ''')
-        conn.commit()
+        
+        # Correctly check if any users exist by fetching the first index [0]
+        row_count = conn.execute('SELECT COUNT(*) FROM users').fetchone()[0]
+        
+        if row_count == 0:
+            admin_username = 'admin'
+            hashed_password = generate_password_hash('admin')
+            admin_role = 'admin'
+            
+            conn.execute(
+                'INSERT INTO users (username, password, role) VALUES (?, ?, ?)',
+                (admin_username, hashed_password, admin_role)
+            )
+            conn.commit()
 
 
 # --- APPLICATION ROUTES ---
