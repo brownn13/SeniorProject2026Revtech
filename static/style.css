@@ -160,3 +160,143 @@ li:last-child {
     border-radius: 4px;
     margin-left: 8px;
 }
+.user-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+.user-table th, .user-table td {
+    padding: 12px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+}
+.user-table th {
+    background-color: #f8f9fa;
+    font-weight: bold;
+}
+/* Container to completely center the login panel on the screen */
+.login-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 75vh; /* Gives breathing space above and below the header/footer */
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+/* The structural glass/card style body */
+.login-card {
+    background: #ffffff;
+    width: 100%;
+    max-width: 420px;
+    padding: 40px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    border: 1px solid #eaeaea;
+}
+
+.login-card h2 {
+    margin: 0 0 8px 0;
+    font-size: 24px;
+    color: #2c3e50;
+    text-align: center;
+}
+
+.login-subtitle {
+    margin: 0 0 24px 0;
+    font-size: 14px;
+    color: #7f8c8d;
+    text-align: center;
+    line-height: 1.4;
+}
+
+/* Stack layout for forms */
+.login-form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.form-group label {
+    font-size: 14px;
+    font-weight: 600;
+    color: #34495e;
+}
+
+/* Input boxes styling */
+.form-group input {
+    width: 100%;
+    padding: 12px 14px;
+    font-size: 15px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    background-color: #fafafa;
+    box-sizing: border-box;
+    transition: border-color 0.2s ease, background-color 0.2s ease;
+}
+
+.form-group input:focus {
+    border-color: #007bff;
+    background-color: #ffffff;
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.15);
+}
+
+/* Call-to-action Login Button */
+.btn-submit {
+    width: 100%;
+    padding: 14px;
+    font-size: 16px;
+    font-weight: bold;
+    color: #ffffff;
+    background-color: #007bff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    margin-top: 10px;
+}
+
+.btn-submit:hover {
+    background-color: #0056b3;
+}
+
+.btn-submit:active {
+    background-color: #004085;
+}
+
+/* --- Alert and Error Messaging Styling --- */
+.flash-messages {
+    margin-bottom: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.flash-message {
+    padding: 12px 16px;
+    border-radius: 4px;
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 1.4;
+}
+
+/* Handles styling for bad passwords / error responses from Flask */
+.flash-message.error {
+    background-color: #fdf2f2;
+    color: #9b1c1c;
+    border: 1px solid #f8b4b4;
+}
+
+/* Handles success feedback alerts if needed */
+.flash-message.success {
+    background-color: #f3faf7;
+    color: #03543f;
+    border: 1px solid #def7ec;
+}

@@ -1,0 +1,23 @@
+{% if mode == 'create' %}
+<h2>Create User</h2>
+{% else %}
+<h2>Edit User</h2>
+{% endif %}
+
+<form method="POST">
+    <input type="text" name="username" placeholder="Username"
+           value="{{ user.username if user else '' }}" required><br>
+
+    {% if mode == 'create' %}
+    <input type="password" name="password" placeholder="Password" required><br>
+    {% endif %}
+
+    <select name="role">
+        <option value="user" {% if user and user.role == 'user' %}selected{% endif %}>User</option>
+        <option value="admin" {% if user and user.role == 'admin' %}selected{% endif %}>Admin</option>
+    </select><br>
+
+    <button type="submit">Save</button>
+</form>
+
+<a href="/admin/users">Back</a>

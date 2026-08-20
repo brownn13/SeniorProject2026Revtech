@@ -1,0 +1,23 @@
+<h2>User Catalog (Admin)</h2>
+<a href="/admin/users/create">Create User</a><br><br>
+
+<table border="1" cellpadding="5">
+    <tr>
+        <th>ID</th><th>Username</th><th>Role</th><th>Actions</th>
+    </tr>
+    {% for u in users %}
+    <tr>
+        <td>{{ u.id }}</td>
+        <td>{{ u.username }}</td>
+        <td>{{ u.role }}</td>
+        <td>
+            <a href="/admin/users/{{ u.id }}/edit">Edit</a>
+            <form method="POST" action="/admin/users/{{ u.id }}/delete" style="display:inline;">
+                <button type="submit" onclick="return confirm('Delete user?');">Delete</button>
+            </form>
+        </td>
+    </tr>
+    {% endfor %}
+</table>
+
+<a href="/home">Back</a>
