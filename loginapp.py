@@ -105,10 +105,15 @@ def register():
                 
     return render_template('register.html')
 
+@app.route('/dashboard')
+@login_required
+def dashboard():
+    return render_template('dashboard.html')
+
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if current_user.is_authenticated:
-        return redirect(url_for('home'))
+        return redirect(url_for('dashboard'))
         
     if request.method == 'POST':
         username = request.form['username']
@@ -120,7 +125,7 @@ def login():
         if user and check_password_hash(user['password'], password):
             user_obj = User(user['id'], user['username'], user['role'])
             login_user(user_obj)
-            return redirect(url_for('home'))
+            return redirect(url_for('dashboard'))
             
         flash('Invalid credentials. Please check the username and password before logging in.', 'error')
         
