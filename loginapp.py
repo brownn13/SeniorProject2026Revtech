@@ -122,7 +122,7 @@ def login():
             login_user(user_obj)
             return redirect(url_for('home'))
             
-        flash('Invalid credentials.', 'error')
+        flash('Invalid credentials. Please check the username and password before logging in.', 'error')
         
     return render_template('login.html')
 
