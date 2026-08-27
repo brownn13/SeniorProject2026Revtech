@@ -25,6 +25,95 @@ DB_PATH = Path(__file__).resolve().parent.parent / "users.db"
 
 st.set_page_config(page_title="Login", page_icon="🏎️")
 
+# Presentation only. Everything is scoped to the .st-key-* classes that
+# Streamlit adds for keyed containers, so the signed-in view below is
+# untouched. Colours come from the theme variables so this still looks
+# right if the team edits .streamlit/config.toml.
+st.markdown(
+    """
+    <style>
+    /* Less dead space above the title. */
+    [data-testid="stMainBlockContainer"] { padding-top: 2.5rem; }
+
+    /* Hero: big centred car above the title. */
+    .st-key-login_hero { text-align: center; }
+    .st-key-login_hero .revtech-emoji {
+        font-size: 4rem;
+        line-height: 1;
+        margin-bottom: 0.25rem;
+        animation: revtech-bob 2.6s ease-in-out infinite;
+    }
+
+    /* Card settles into place on load. */
+    .st-key-login_card { animation: revtech-rise 0.45s ease-out both; }
+
+    /* Submit button lifts slightly under the cursor. */
+    .st-key-login_card [data-testid="stFormSubmitButton"] button {
+        transition: transform 0.15s ease, box-shadow 0.15s ease;
+    }
+    .st-key-login_card [data-testid="stFormSubmitButton"] button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.28);
+        box-shadow: 0 4px 12px color-mix(
+            in srgb, var(--primary-color, #4c8bf5) 35%, transparent
+        );
+    }
+
+    /* Signed-in card matches the login card, with room before the
+       full-width admin section that follows it. */
+    .st-key-signed_in_card {
+        animation: revtech-rise 0.45s ease-out both;
+        margin-bottom: 1.5rem;
+    }
+
+    /* "Continue to the app" is the primary action here; the Log out
+       button keeps Streamlit's quieter secondary styling. */
+    .st-key-signed_in_card [data-testid="stPageLink"] a {
+        background: var(--primary-color, #4c8bf5);
+        border-radius: 0.5rem;
+        justify-content: center;
+        padding: 0.5rem 1rem;
+        transition: transform 0.15s ease, box-shadow 0.15s ease;
+    }
+    .st-key-signed_in_card [data-testid="stPageLink"] a,
+    .st-key-signed_in_card [data-testid="stPageLink"] a * {
+        color: #ffffff;
+    }
+    .st-key-signed_in_card [data-testid="stPageLink"] a:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.28);
+        box-shadow: 0 4px 12px color-mix(
+            in srgb, var(--primary-color, #4c8bf5) 35%, transparent
+        );
+    }
+
+    @keyframes revtech-bob {
+        0%, 100% { transform: translateY(0); }
+        50%      { transform: translateY(-6px); }
+    }
+    @keyframes revtech-rise {
+        from { opacity: 0; transform: translateY(12px); }
+        to   { opacity: 1; transform: none; }
+    }
+
+    /* Motion is opt-out for anyone who asks the OS to reduce it. */
+    @media (prefers-reduced-motion: reduce) {
+        .st-key-login_hero .revtech-emoji,
+        .st-key-login_card,
+        .st-key-signed_in_card { animation: none; }
+        .st-key-login_card [data-testid="stFormSubmitButton"] button,
+        .st-key-login_card [data-testid="stFormSubmitButton"] button:hover,
+        .st-key-signed_in_card [data-testid="stPageLink"] a,
+        .st-key-signed_in_card [data-testid="stPageLink"] a:hover {
+            transition: none;
+            transform: none;
+        }
+    }
+    </style>
+    """,
+    unsafe_allow_html=True,
+)
+
 
 # --- DATABASE ---------------------------------------------------------------
 
@@ -100,38 +189,54 @@ def sign_out():
 
 
 def render_login_form():
-    st.title("System Sign In")
-    st.caption("Please enter your credentials to continue.")
+    # Keep the form off the far-left edge on wide screens.
+    _left, center, _right = st.columns([1, 2, 1])
 
-    with st.form("login_form"):
-        username = st.text_input("Username", placeholder="Enter your username")
-        password = st.text_input(
-            "Password", type="password", placeholder="Enter your password"
-        )
-        submitted = st.form_submit_button("Secure Log In")
+    with center:
+        with st.container(key="login_hero"):
+            # text_alignment is the supported way to centre these; Streamlit
+            # sets an explicit left alignment that plain inherited CSS loses to.
+            st.markdown(
+                '<div class="revtech-emoji">🏎️</div>',
+                unsafe_allow_html=True,
+                width="stretch",
+                text_alignment="center",
+            )
+            st.title("RevTech", text_alignment="center")
+            st.caption("Sign in to view your data logs", text_alignment="center")
 
-    if not submitted:
-        return
+        with st.container(border=True, key="login_card"):
+            with st.form("login_form"):
+                username = st.text_input("Username", placeholder="Enter your username")
+                password = st.text_input(
+                    "Password", type="password", placeholder="Enter your password"
+                )
+                submitted = st.form_submit_button(
+                    "Secure Log In", type="primary", width="stretch"
+                )
 
-    if not username or not password:
-        st.error("Please enter both a username and a password.")
-        return
+        if not submitted:
+            return
 
-    user = find_user(username)
-    if user and check_password_hash(user["password"], password):
-        st.session_state.auth_user = {
-            "id": user["id"],
-            "username": user["username"],
-            "role": user["role"],
-        }
-        st.session_state.just_logged_in = True
-        st.rerun()
-    else:
-        # Requirement L.2.2
-        st.error(
-            "Invalid credentials. Please check the username and password "
-            "before logging in."
-        )
+        if not username or not password:
+            st.error("Please enter both a username and a password.")
+            return
+
+        user = find_user(username)
+        if user and check_password_hash(user["password"], password):
+            st.session_state.auth_user = {
+                "id": user["id"],
+                "username": user["username"],
+                "role": user["role"],
+            }
+            st.session_state.just_logged_in = True
+            st.rerun()
+        else:
+            # Requirement L.2.2
+            st.error(
+                "Invalid credentials. Please check the username and password "
+                "before logging in."
+            )
 
 
 # --- SIGNED-IN VIEW ---------------------------------------------------------
@@ -234,28 +339,40 @@ def render_admin_panel():
 
 def render_signed_in():
     user = current_user()
-    st.title(f"Welcome, {user['username']}!")
-    st.caption(f"Signed in as: {user['role']}")
 
-    # Requirement L.2.3 — send the user onward after a successful login.
-    landing_path = Path(__file__).resolve().parent.parent / LANDING_PAGE
-    if landing_path.exists():
-        if st.session_state.pop("just_logged_in", False):
-            st.switch_page(LANDING_PAGE)
-        st.page_link(LANDING_PAGE, label="Continue to the app", icon="➡️")
-    else:
-        st.session_state.pop("just_logged_in", False)
-        st.warning(
-            f"Landing page `{LANDING_PAGE}` was not found. "
-            "Update LANDING_PAGE at the top of this file once it exists."
-        )
+    # Same centred layout as the login view.
+    _left, center, _right = st.columns([1, 2, 1])
 
-    if st.button("Log out"):
-        sign_out()
-        st.rerun()
+    with center:
+        with st.container(border=True, key="signed_in_card"):
+            st.title(f"Welcome, {user['username']}!", text_alignment="center")
+            st.caption(f"Signed in as: {user['role']}", text_alignment="center")
 
-    render_change_password()
+            # Requirement L.2.3 — send the user onward after a successful login.
+            landing_path = Path(__file__).resolve().parent.parent / LANDING_PAGE
+            if landing_path.exists():
+                if st.session_state.pop("just_logged_in", False):
+                    st.switch_page(LANDING_PAGE)
+                st.page_link(
+                    LANDING_PAGE,
+                    label="Continue to the app",
+                    icon="➡️",
+                    width="stretch",
+                )
+            else:
+                st.session_state.pop("just_logged_in", False)
+                st.warning(
+                    f"Landing page `{LANDING_PAGE}` was not found. "
+                    "Update LANDING_PAGE at the top of this file once it exists."
+                )
 
+            if st.button("Log out", width="stretch"):
+                sign_out()
+                st.rerun()
+
+        render_change_password()
+
+    # Left at full width — the user table needs the horizontal space.
     if is_admin():
         render_admin_panel()
 
