@@ -267,3 +267,40 @@ li:last-child {
     max-width: 420px;
     padding: 40px;
 }
+
+/* Dark Add User Drawer */
+#registrationDrawer {
+    --drawer-bg: #000;
+    --drawer-heading: #fff;
+    --drawer-label: #e0e0e0;
+    --drawer-input-bg: #111;
+    --drawer-input-border: #444;
+    --drawer-input-text: #fff;
+    --drawer-button-bg: #007bff;
+    --drawer-button-text: #fff;
+}
+
+/* Heading */
+#registrationDrawer h3 {
+    color: var(--drawer-heading);
+}
+
+/* Labels */
+#registrationDrawer label {
+    color: var(--drawer-label);
+}
+
+/* Inputs + Selects */
+#registrationDrawer input,
+#registrationDrawer select {
+    background-color: var(--drawer-input-bg);
+    color: var(--drawer-input-text);
+    border: 1px solid var(--drawer-input-border);
+}
+
+/* Submit Button */
+#registrationDrawer .btn-primary {
+    background-color: var(--drawer-button-bg);
+    color: var(--drawer-button-text);
+    border: none;
+}
