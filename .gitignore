@@ -11,3 +11,6 @@ wheels/
 
 # VS/VSCode files
 .vs
+
+# Local user database (recreated by init_db() with a seeded admin account)
+users.db

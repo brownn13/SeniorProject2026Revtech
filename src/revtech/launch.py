@@ -26,7 +26,7 @@ launch_button = st.sidebar.page_link (
 login_button = st.sidebar.page_link (
     "pages/1_login.py",
     label = "Login",
-    disabled = True
+    disabled = False
     )
 
 graph_button = st.sidebar.page_link (
