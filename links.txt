@@ -5,3 +5,6 @@ https://docs.streamlit.io/develop/api-reference/text/st.help
 
 Log in/log out button:
 https://docs.streamlit.io/develop/concepts/multipage-apps/page-and-navigation
+
+Reading files:
+https://discuss.streamlit.io/t/can-anyone-explain-how-to-use-the-files-in-our-computer-instead-of-uploading-it-everytime-in-bot/62282/3
