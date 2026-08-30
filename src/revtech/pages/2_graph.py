@@ -189,6 +189,55 @@ for line in csv_bytes.decode("utf-8-sig").splitlines():
         }
     )
 
+# Generate unique file ID for session state management (allows multiple independent file uploads)
+# Hash file contents so identical files maintain state even with different names
+file_identifier = hashlib.sha256(csv_bytes).hexdigest()[:12]
+
+with st.expander("AI performance assistant", expanded=False):
+    # User-facing explanation and disclaimer
+    st.write(
+        "Get an evidence-based review of this log, including which parameters "
+        "to investigate first."
+    )
+    st.caption(
+        "This is an informational aid, not a confirmed diagnosis or a substitute "
+        "for qualified mechanical advice."
+    )
+    
+    # Allow user to choose between beginner-friendly or advanced technical analysis
+    audience = st.segmented_control(
+        "Answer style",
+        options=("Novice answer", "Advanced answer"),
+        default="Novice answer",
+        key=f"analysis_audience_{file_identifier}",
+    )
+    if audience is None:
+        audience = "Novice answer"
+    
+    # Create session key to cache analysis results per file and per audience style
+    # This allows different audiences to have separate cached analyses
+    analysis_key = f"gemini_analysis_{file_identifier}_{audience.casefold().replace(' ', '_')}"
+
+    # Analysis button: only queries Gemini when clicked, not on every page load
+    if st.button(
+        f"Get {audience.casefold()}",
+        type="primary",
+        key=f"analyze_log_{file_identifier}",
+    ):
+        with st.spinner("Reviewing the data log..."):
+            try:
+                # Call Gemini API with data, metadata, and audience preference
+                st.session_state[analysis_key] = analyze_data_log_with_gemini(
+                    data, numeric_data, log_metadata, audience
+                )
+            except Exception as error:
+                # Display API errors to user (missing key, network issue, etc.)
+                st.error(f"Gemini could not analyze this log: {error}")
+
+    # Display cached analysis if available (persists across reruns without re-querying)
+    if analysis_key in st.session_state:
+        st.markdown(st.session_state[analysis_key])
+
 st.divider()
 render_data_log_graph(
     data,
