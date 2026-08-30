@@ -14,6 +14,10 @@ data = pd.DataFrame(
     np.random.randn(20, 3),
     columns=['Fuel Pressure', 'Air/Fuel Ratio', 'Oil Pressure'])
 
+login_button = st.button("Login")
+if login_button:
+    st.switch_page('pages/1_login.py')
+
 st.title("Welcome to RevTech!")
 st.sidebar.success("Welcome!")
 
@@ -32,20 +36,14 @@ login_button = st.sidebar.page_link (
 graph_button = st.sidebar.page_link (
     "pages/2_graph.py",
     label = "Graph",
-    disabled = True
+    disabled = False
     )
 
 st.caption("Example chart")
 st.line_chart(data)
 
-uploaded_files = st.file_uploader(
-    "Upload data", accept_multiple_files=False, type="csv"
-)
-
-if (uploaded_files):
-    for uploaded_file in uploaded_files:
-        df = pd.read_csv(uploaded_file)
-        st.write(df)
+st.subheader('Click below to start graphing!')
+st.link_button('Click me!', 'graph')
 
 st.header("About Us:", divider = "red")
 
