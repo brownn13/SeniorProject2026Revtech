@@ -17,7 +17,12 @@ VSCode Users: Install the UV Extension at <https://marketplace.visualstudio.com/
 This is the easiest route to get started. Afterwards, continue to uv setup instructions.
 
 ## uv automatic setup (all OSs)
-After cloning repo and setting up uv, just run ```uv run revtech``` and the environment will be set up for you.
+After cloning the repository and installing uv, start the app from the repository
+root. The environment will be prepared automatically:
+
+```bash
+uv run revtech
+```
 
 ## MacOS/Linux
 ## uv manual setup instructions

@@ -3,8 +3,8 @@
 ## Environment and commands
 
 - Python 3.14 is required by both `.python-version` and `pyproject.toml`; use `uv` with the committed `uv.lock` (`uv sync`).
-- Start the actual app from `src/revtech` with `uv run streamlit run launch.py`. The working directory matters: it lets Streamlit find `.streamlit/config.toml`, and `launch.py` opens `./about_us.md` relative to it. `uv` still discovers the project in the repository root.
-- Do not use `uv run revtech` to verify the web app. The configured `revtech:main` console entrypoint currently only prints `Hello from revtech!`.
+- Start the app from the repository root with `uv run revtech`. The console entrypoint switches to `src/revtech` before launching Streamlit so it finds `.streamlit/config.toml` and the relative `about_us.md` file.
+- The equivalent direct command is `uv run streamlit run launch.py` from `src/revtech`.
 - `uv run pytest` runs the focused tests; use `uv run pytest tests/test_user_store.py` for accounts and `uv run pytest tests/test_file_store.py` for encrypted uploads. No lint/typecheck configuration or CI workflow exists yet, so also use `uv run python -m compileall -q src` and manually exercise affected Streamlit pages.
 - Treat `pyproject.toml` plus `uv.lock` as dependency sources of truth. `requirements.txt` is the separate pip installation snapshot and is not updated by `uv sync`.
 
