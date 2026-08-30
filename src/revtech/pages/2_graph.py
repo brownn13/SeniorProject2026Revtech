@@ -1,10 +1,12 @@
 """RevTech data-log graph page."""
 
+import hashlib
 import os
 
 import pandas as pd
 import streamlit as st
 from cryptography.fernet import Fernet
+from google import genai
 from streamlit.errors import StreamlitSecretNotFoundError
 
 from revtech.file_store import (
@@ -14,7 +16,12 @@ from revtech.file_store import (
     load_upload,
     save_upload,
 )
-from revtech.graphing import DataLogError, parse_data_log, render_data_log_graph
+from revtech.graphing import (
+    DataLogError,
+    numeric_data_for,
+    parse_data_log,
+    render_data_log_graph,
+)
 from revtech.navigation import render_navigation
 from revtech.user_store import list_users
 
@@ -37,6 +44,80 @@ def get_file_encryption_key():
         st.error("The configured file encryption key is invalid.")
         st.stop()
     return encryption_key
+
+
+def get_gemini_api_key():
+    """Load the Gemini API key from the environment or Streamlit secrets."""
+    api_key = os.environ.get("GEMINI_API_KEY")
+    if api_key:
+        return api_key
+
+    try:
+        return st.secrets.get("GEMINI_API_KEY")
+    except StreamlitSecretNotFoundError:
+        return None
+
+
+def analyze_data_log_with_gemini(data, numeric_data, metadata, audience):
+    """Ask Gemini for an audience-appropriate analysis of a data log."""
+    api_key = get_gemini_api_key()
+    if not api_key:
+        raise RuntimeError(
+            "Add `GEMINI_API_KEY` to `.streamlit/secrets.toml` or the environment."
+        )
+
+    statistics = numeric_data.describe().transpose().round(3).to_csv()
+    sample = data.head(12).to_csv(index=False)
+    metadata_text = pd.DataFrame(metadata).to_csv(index=False) if metadata else "None"
+
+    if audience == "Novice answer":
+        audience_instructions = """
+Write for someone with little automotive data-log experience. Use plain language,
+define every technical term briefly, explain why each parameter matters, and use
+simple analogies only when they improve understanding. Avoid overwhelming the
+reader with raw statistics. Give clear, practical checks they can discuss with a
+mechanic.
+"""
+    else:
+        audience_instructions = """
+Write for an experienced tuner or technician. Reference exact channel names and
+relevant statistics, compare related parameters when the data supports it, and
+identify correlations, outliers, trends, and missing channels worth logging next.
+Distinguish measured evidence from hypotheses and avoid claiming causation.
+"""
+
+    prompt = f"""
+You are RevTech, an automotive data-log assistant. Analyze the supplied vehicle
+log for performance insight. State clearly what the data shows and where its
+limits lie; never confirm faults or replace a hands-on mechanic. Do not invent
+missing details.
+
+Audience: {audience}
+{audience_instructions}
+
+Keep output concise and return Markdown using these exact sections:
+Overall Summary
+Priority Parameters
+Key Patterns & Potential Concerns
+3 Next Log Steps
+
+Log metadata:
+{metadata_text}
+
+Numeric column statistics:
+{statistics}
+
+First 12 data rows:
+{sample}
+"""
+    client = genai.Client(api_key=api_key)
+    response = client.models.generate_content(
+        model="gemini-3.6-flash",
+        contents=prompt,
+    )
+    if not response.text:
+        raise RuntimeError("Gemini returned an empty analysis.")
+    return response.text
 
 
 st.set_page_config(page_title="Data Log Graph", page_icon="🏎️", layout="wide")
@@ -168,6 +249,7 @@ if save_requested:
         st.success(f'Encrypted copy of "{saved_upload.original_name}" saved.')
 
 parameter_names = data.columns.tolist()
+numeric_data = numeric_data_for(data)
 
 # Lines beginning with # contain one-time log information rather than values
 # recorded at every sample. Preserve them for display while keeping them out of
@@ -188,6 +270,45 @@ for line in csv_bytes.decode("utf-8-sig").splitlines():
             "Value": field_value.strip() if separator else "",
         }
     )
+
+file_identifier = hashlib.sha256(csv_bytes).hexdigest()[:12]
+with st.expander("AI performance assistant", expanded=False):
+    st.write(
+        "Get an evidence-based review of this log, including which parameters "
+        "to investigate first."
+    )
+    st.caption(
+        "This sends log metadata, numeric summaries, and the first 12 data rows "
+        "to Google Gemini. It is an informational aid, not a confirmed diagnosis "
+        "or a substitute for qualified mechanical advice."
+    )
+
+    audience = st.segmented_control(
+        "Answer style",
+        options=("Novice answer", "Advanced answer"),
+        default="Novice answer",
+        key=f"analysis_audience_{file_identifier}",
+    )
+    if audience is None:
+        audience = "Novice answer"
+
+    audience_identifier = audience.casefold().replace(" ", "_")
+    analysis_key = f"gemini_analysis_{file_identifier}_{audience_identifier}"
+    if st.button(
+        f"Get {audience.casefold()}",
+        type="primary",
+        key=f"analyze_log_{file_identifier}",
+    ):
+        with st.spinner("Reviewing the data log..."):
+            try:
+                st.session_state[analysis_key] = analyze_data_log_with_gemini(
+                    data, numeric_data, log_metadata, audience
+                )
+            except Exception as error:
+                st.error(f"Gemini could not analyze this log: {error}")
+
+    if analysis_key in st.session_state:
+        st.markdown(st.session_state[analysis_key])
 
 st.divider()
 render_data_log_graph(

@@ -79,6 +79,13 @@ The `REVTECH_FILE_ENCRYPTION_KEY` environment variable may be used instead.
 Do not commit or replace this key after files have been saved; without the
 original key, existing uploads cannot be decrypted.
 
+## Gemini analysis setup
+
+The optional AI performance assistant requires a Google Gemini API key. Set
+`GEMINI_API_KEY` in `src/revtech/.streamlit/secrets.toml` or in the environment.
+The assistant sends log metadata, numeric summaries, and the first 12 data rows
+to Google Gemini only when the user requests an analysis.
+
 ## Testing
 
 Run the complete test suite from the repository root:
