@@ -344,6 +344,11 @@ graph.addEventListener('mousemove', (event) => {
 
 st.set_page_config(page_title="Data Log Graph", page_icon="🏎️", layout="wide")
 
+# Sidebar navigation is turned off in .streamlit/config.toml, so without this
+# link there is no way back to the login page once you land here -- which also
+# makes the Log out button unreachable.
+st.sidebar.page_link("pages/1_login.py", label="Account", icon="👤")
+
 st.title("Data Log Graph")
 st.write(
     "Upload a CSV data log and select the parameters you want to view."
