@@ -14,3 +14,7 @@ wheels/
 
 # Local user database (recreated by init_db() with a seeded admin account)
 users.db
+
+# Runtime data and local encryption secrets
+src/revtech/user_uploads/
+src/revtech/.streamlit/secrets.toml

@@ -14,14 +14,13 @@ from pathlib import Path
 import streamlit as st
 from werkzeug.security import check_password_hash, generate_password_hash
 
+from revtech.file_store import delete_user_uploads
+from revtech.user_store import create_user, find_user, get_db, init_db, list_users
+
 # Where to send the user after a successful login (requirement L.2.3).
 # The dashboard page does not exist on main yet. When a teammate adds it,
 # change this one line to "pages/3_dashboard.py".
 LANDING_PAGE = "pages/2_graph.py"
-
-# users.db lives next to launch.py so it is found no matter which
-# directory Streamlit is started from.
-DB_PATH = Path(__file__).resolve().parent.parent / "users.db"
 
 st.set_page_config(page_title="Login", page_icon="🏎️")
 
@@ -115,55 +114,6 @@ st.markdown(
 )
 
 
-# --- DATABASE ---------------------------------------------------------------
-
-
-def get_db():
-    """Open a connection with dictionary-style row access."""
-    connection = sqlite3.connect(DB_PATH)
-    connection.row_factory = sqlite3.Row
-    return connection
-
-
-def init_db():
-    """Create the users table and seed a default admin on first run."""
-    with get_db() as connection:
-        connection.execute(
-            """
-            CREATE TABLE IF NOT EXISTS users (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                username TEXT UNIQUE NOT NULL,
-                password TEXT NOT NULL,
-                role TEXT NOT NULL
-            )
-            """
-        )
-        user_count = connection.execute("SELECT COUNT(*) FROM users").fetchone()[0]
-        if user_count == 0:
-            connection.execute(
-                "INSERT INTO users (username, password, role) VALUES (?, ?, ?)",
-                ("admin", generate_password_hash("admin"), "admin"),
-            )
-            connection.commit()
-
-
-def find_user(username):
-    with get_db() as connection:
-        return connection.execute(
-            "SELECT * FROM users WHERE username = ?", (username,)
-        ).fetchone()
-
-
-def list_users(name_filter="", role_filter="All"):
-    query = "SELECT id, username, role FROM users WHERE username LIKE ?"
-    parameters = [f"%{name_filter}%"]
-    if role_filter != "All":
-        query += " AND role = ?"
-        parameters.append(role_filter)
-    with get_db() as connection:
-        return connection.execute(query + " ORDER BY id", parameters).fetchall()
-
-
 init_db()
 
 
@@ -206,6 +156,9 @@ def render_login_form():
             st.caption("Sign in to view your data logs", text_alignment="center")
 
         with st.container(border=True, key="login_card"):
+            if st.session_state.pop("account_created", False):
+                st.success("Account created successfully. You can now log in.")
+
             with st.form("login_form"):
                 username = st.text_input("Username", placeholder="Enter your username")
                 password = st.text_input(
@@ -214,6 +167,12 @@ def render_login_form():
                 submitted = st.form_submit_button(
                     "Secure Log In", type="primary", width="stretch"
                 )
+
+            st.page_link(
+                "pages/3_create_account.py",
+                label="Create a new account",
+                width="stretch",
+            )
 
         if not submitted:
             return
@@ -304,17 +263,7 @@ def render_admin_panel():
                 st.error("All fields are required.")
             else:
                 try:
-                    with get_db() as connection:
-                        connection.execute(
-                            "INSERT INTO users (username, password, role) "
-                            "VALUES (?, ?, ?)",
-                            (
-                                new_username,
-                                generate_password_hash(new_password),
-                                new_role,
-                            ),
-                        )
-                        connection.commit()
+                    create_user(new_username, new_password, new_role)
                     st.success(f'User "{new_username}" registered successfully.')
                     st.rerun()
                 except sqlite3.IntegrityError:
@@ -328,12 +277,20 @@ def render_admin_panel():
             labels = {f'{u["username"]} (ID {u["id"]})': u["id"] for u in deletable}
             choice = st.selectbox("Select a user", list(labels))
             if st.button("Delete user", type="primary"):
+                deleted_user_id = labels[choice]
                 with get_db() as connection:
                     connection.execute(
-                        "DELETE FROM users WHERE id = ?", (labels[choice],)
+                        "DELETE FROM users WHERE id = ?", (deleted_user_id,)
                     )
                     connection.commit()
-                st.success("User deleted.")
+                try:
+                    delete_user_uploads(deleted_user_id)
+                except OSError as error:
+                    st.warning(
+                        f"User deleted, but their saved logs could not be removed: {error}"
+                    )
+                    return
+                st.success("User and saved logs deleted.")
                 st.rerun()
 
 
