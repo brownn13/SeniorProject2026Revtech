@@ -172,6 +172,9 @@ save_requested = st.button(
     type="primary",
     disabled=uploaded_file is None,
 )
+save_success_message = st.session_state.pop("upload_save_success", None)
+if save_success_message:
+    st.success(save_success_message)
 
 st.subheader(f"Saved logs for {owner_name}")
 saved_uploads = list_uploads(current_user, owner_id, encryption_key)
@@ -211,10 +214,7 @@ if selected_upload_id is not None:
             st.session_state.pop("confirm_upload_delete", None)
             st.rerun()
 
-if uploaded_file is not None:
-    csv_bytes = uploaded_file.getvalue()
-    display_name = uploaded_file.name
-elif selected_upload_id is not None and selected_upload.readable:
+if selected_upload_id is not None and selected_upload.readable:
     try:
         loaded_upload = load_upload(
             current_user, owner_id, selected_upload_id, encryption_key
@@ -224,6 +224,12 @@ elif selected_upload_id is not None and selected_upload.readable:
         st.stop()
     csv_bytes = loaded_upload.csv_bytes
     display_name = loaded_upload.original_name
+elif selected_upload_id is not None:
+    st.info("Delete this unreadable saved log or select another log to continue.")
+    st.stop()
+elif uploaded_file is not None:
+    csv_bytes = uploaded_file.getvalue()
+    display_name = uploaded_file.name
 else:
     st.info("Upload a CSV file or select a saved log to graph its parameters.")
     st.stop()
@@ -235,18 +241,27 @@ except DataLogError as error:
     st.stop()
 
 if save_requested:
+    uploaded_csv_bytes = uploaded_file.getvalue()
     try:
-        saved_upload = save_upload(
-            current_user,
-            current_user["id"],
-            display_name,
-            csv_bytes,
-            encryption_key,
-        )
-    except (OSError, ValueError) as error:
-        st.error(f"The encrypted copy could not be saved: {error}")
+        parse_data_log(uploaded_csv_bytes)
+    except DataLogError as error:
+        st.error(f"The uploaded file could not be saved: {error}")
     else:
-        st.success(f'Encrypted copy of "{saved_upload.original_name}" saved.')
+        try:
+            saved_upload = save_upload(
+                current_user,
+                current_user["id"],
+                uploaded_file.name,
+                uploaded_csv_bytes,
+                encryption_key,
+            )
+        except (OSError, ValueError) as error:
+            st.error(f"The encrypted copy could not be saved: {error}")
+        else:
+            st.session_state.upload_save_success = (
+                f'Encrypted copy of "{saved_upload.original_name}" saved.'
+            )
+            st.rerun()
 
 parameter_names = data.columns.tolist()
 numeric_data = numeric_data_for(data)
