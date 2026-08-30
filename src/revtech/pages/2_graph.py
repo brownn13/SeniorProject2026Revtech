@@ -1,10 +1,14 @@
 """RevTech data-log graph page."""
 
 import hashlib
+import os
+import tomllib
+from pathlib import Path
 
 import pandas as pd
 import plotly.graph_objects as go
 import streamlit as st
+from google import genai
 
 
 def find_default_parameters(parameters):
@@ -67,6 +71,129 @@ def parameter_color(parameter, all_parameters):
     parameter_index = all_parameters.index(parameter)
     hue = round((265 + parameter_index * 137.508) % 360)
     return f"hsl({hue}, 78%, 62%)"
+
+
+def get_gemini_api_key():
+    """Read the Gemini key from Streamlit secrets or the environment.
+    
+    Tries three sources in priority order:
+    1. GEMINI_API_KEY environment variable
+    2. Streamlit secrets configuration
+    3. Local .streamlit/secrets.toml file
+    """
+    # First, check environment variable (highest priority for CI/CD and deployments)
+    api_key = os.getenv("GEMINI_API_KEY")
+    if api_key:
+        return api_key
+
+    # Second, check Streamlit secrets (works in Streamlit Cloud and local dev)
+    try:
+        api_key = st.secrets.get("GEMINI_API_KEY")
+    except (FileNotFoundError, KeyError):
+        api_key = None
+    if api_key:
+        return api_key
+
+    # Third, check local .streamlit/secrets.toml file (development fallback)
+    local_secrets_path = Path(__file__).resolve().parents[1] / ".streamlit" / "secrets.toml"
+    if local_secrets_path.exists():
+        try:
+            with local_secrets_path.open("rb") as secrets_file:
+                return tomllib.load(secrets_file).get("GEMINI_API_KEY")
+        except tomllib.TOMLDecodeError as error:
+            raise RuntimeError(
+                "src/revtech/.streamlit/secrets.toml must contain "
+                'GEMINI_API_KEY = "your-key".'
+            ) from error
+    return None
+
+
+def analyze_data_log_with_gemini(data, numeric_data, metadata, audience):
+    """Send data log to Google Gemini API for AI-powered analysis.
+    
+    Args:
+        data: Original pandas DataFrame from uploaded CSV
+        numeric_data: DataFrame with converted numeric columns (NaN for invalid values)
+        metadata: List of dict with 'Field' and 'Value' keys extracted from CSV comments
+        audience: Either "Novice answer" or "Advanced answer" for tailored output
+    
+    Returns:
+        Analysis text in Markdown format with sections:
+        - Overall Summary
+        - Priority Parameters
+        - Key Patterns & Potential Concerns
+        - 3 Next Log Steps
+    
+    Raises:
+        RuntimeError: If Gemini API key is not found in any configured source
+    """
+    # Retrieve API key from environment, Streamlit secrets, or local file
+    api_key = get_gemini_api_key()
+    if not api_key:
+        raise RuntimeError(
+            "Add GEMINI_API_KEY to .streamlit/secrets.toml or your environment."
+        )
+
+    # Prepare data summaries to send to Gemini
+    # statistics: min, max, mean, std dev for each numeric column
+    statistics = numeric_data.describe().transpose().round(3).to_csv()
+    # sample: first 12 rows to show Gemini representative data points
+    sample = data.head(12).to_csv(index=False)
+    # metadata_text: one-time log info (vehicle, date, notes, etc. from CSV comments)
+    metadata_text = pd.DataFrame(metadata).to_csv(index=False) if metadata else "None"
+    
+    # Customize Gemini instructions based on audience technical level
+    if audience == "Novice answer":
+        # For novice users: plain language, explain jargon, practical mechanic checks
+        audience_instructions = """
+Write for someone with little automotive data-log experience. Use plain language,
+define every technical term briefly, explain why each parameter matters, and use
+simple analogies only when they improve understanding. Avoid overwhelming the
+reader with raw statistics. Give clear, practical checks they can discuss with a
+mechanic.
+"""
+    else:
+        # For advanced users: cite exact data, identify correlations and trends
+        audience_instructions = """
+Write for an experienced tuner or technician. Reference exact channel names and
+relevant statistics, compare related parameters when the data supports it, and
+identify correlations, outliers, trends, and missing channels worth logging next.
+Distinguish measured evidence from hypotheses and avoid claiming causation.
+"""
+
+    # Construct prompt with clear instructions, audience context, and data
+    prompt = f"""
+You are RevTech, an automotive data-log assistant. Analyze the supplied vehicle
+log for performance insight. State clearly what the data shows and where its
+limits lie; never confirm faults or replace a hands-on mechanic. Do not invent
+missing details.
+
+Audience: {audience}
+{audience_instructions}
+
+Keep output concise and return Markdown using these exact sections:
+Overall Summary
+Priority Parameters
+Key Patterns & Potential Concerns
+3 Next Log Steps
+
+
+Log metadata:
+{metadata_text}
+
+Numeric column statistics:
+{statistics}
+
+First 12 data rows:
+{sample}
+"""
+    # Call Gemini 3.6 Flash (fast, lightweight model suitable for interactive analysis)
+    client = genai.Client(api_key=api_key)
+    response = client.models.generate_content(
+        model="gemini-3.6-flash",
+        contents=prompt,
+    )
+    return response.text
 
 
 def render_cursor_following_chart(graph, graph_id):
@@ -280,6 +407,55 @@ for line in csv_bytes.decode("utf-8-sig").splitlines():
             "Value": field_value.strip() if separator else "",
         }
     )
+
+# Generate unique file ID for session state management (allows multiple independent file uploads)
+# Hash file contents so identical files maintain state even with different names
+file_identifier = hashlib.sha256(csv_bytes).hexdigest()[:12]
+
+with st.expander("AI performance assistant", expanded=False):
+    # User-facing explanation and disclaimer
+    st.write(
+        "Get an evidence-based review of this log, including which parameters "
+        "to investigate first."
+    )
+    st.caption(
+        "This is an informational aid, not a confirmed diagnosis or a substitute "
+        "for qualified mechanical advice."
+    )
+    
+    # Allow user to choose between beginner-friendly or advanced technical analysis
+    audience = st.segmented_control(
+        "Answer style",
+        options=("Novice answer", "Advanced answer"),
+        default="Novice answer",
+        key=f"analysis_audience_{file_identifier}",
+    )
+    if audience is None:
+        audience = "Novice answer"
+    
+    # Create session key to cache analysis results per file and per audience style
+    # This allows different audiences to have separate cached analyses
+    analysis_key = f"gemini_analysis_{file_identifier}_{audience.casefold().replace(' ', '_')}"
+
+    # Analysis button: only queries Gemini when clicked, not on every page load
+    if st.button(
+        f"Get {audience.casefold()}",
+        type="primary",
+        key=f"analyze_log_{file_identifier}",
+    ):
+        with st.spinner("Reviewing the data log..."):
+            try:
+                # Call Gemini API with data, metadata, and audience preference
+                st.session_state[analysis_key] = analyze_data_log_with_gemini(
+                    data, numeric_data, log_metadata, audience
+                )
+            except Exception as error:
+                # Display API errors to user (missing key, network issue, etc.)
+                st.error(f"Gemini could not analyze this log: {error}")
+
+    # Display cached analysis if available (persists across reruns without re-querying)
+    if analysis_key in st.session_state:
+        st.markdown(st.session_state[analysis_key])
 
 st.divider()
 
