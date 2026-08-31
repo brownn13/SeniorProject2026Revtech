@@ -12,6 +12,8 @@ def render_navigation(current_page):
         actions.append(("Home", "launch.py"))
     if current_user and current_page != "graph":
         actions.append(("Graph", "pages/2_graph.py"))
+    if current_user and current_page != "support":
+        actions.append(("Support", "pages/4_support.py"))
 
     spacer, *action_columns = st.columns([6, *([1] * (len(actions) + 1))])
     del spacer
