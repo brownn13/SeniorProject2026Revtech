@@ -6,7 +6,7 @@ Python web app to visualize car data extracted from `.csv` files.
 
 See <https://docs.streamlit.io/get-started/installation> for more information.
 
-These instructions assume Python 3.14 or Python 3.10 is already installed and the repository is cloned on the computer.
+These instructions assume Python 3.14 is already installed and the repository is cloned on the computer.
 
 To install and use dependencies, Python normally requires a virtual environment, or venv, and a package manager.
 
